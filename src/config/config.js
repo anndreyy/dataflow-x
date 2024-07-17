@@ -33,6 +33,17 @@ const sqlConfig = {
             enableArithAbort: true,
             trustServerCertificate: true,
         }
+    },
+    protheus: {
+        user: process.env.PROTHEUS_USERNAME,
+        password: process.env.PROTHEUS_PASSWORD,
+        server: process.env.PROTHEUS_SERVER,
+        database: process.env.PROTHEUS_DATABASE,
+        options: {
+            encrypt: true,
+            enableArithAbort: true,
+            trustServerCertificate: true,
+        }
     }
 };
 

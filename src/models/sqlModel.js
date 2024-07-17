@@ -1,11 +1,11 @@
-const sql = require('mssql');
+var sql = require('mssql');
 const { sqlConfig } = require('../config/config');
 
-async function connectToSql(origin, io = console.log) {
-    io.log('Conectando ao SQL Server');
+async function connectToSql(origin, io = console) {
+    io.log(`Conectando ao SQL Server ${origin}`);
     try {
-        await sql.connect(sqlConfig[origin]);
-        io.log('Conectado ao SQL Server');
+       await sql.connect(sqlConfig[origin]);
+        io.log(`Conectado ao SQL Server ${origin}`);
 
         return
     } catch (err) {
@@ -14,7 +14,9 @@ async function connectToSql(origin, io = console.log) {
     }
 }
 
-async function fetchTableSchema(schemadb, table) {
+async function fetchTableSchema(origin, schemadb, table) {
+    connection = await sql.connect(sqlConfig[origin]);
+
     const query = `
         SELECT 
             COLUMN_NAME, 
@@ -26,27 +28,37 @@ async function fetchTableSchema(schemadb, table) {
             AND TABLE_SCHEMA = '${schemadb}'
     `;
     try {
-        const result = await sql.query(query);
+        const result = await connection.query(query);
         return result.recordset;
     } catch (err) {
         console.error('Erro ao obter o esquema da tabela do SQL Server:', err);
         throw err;
+    } finally {
+        closeConnection();
     }
 }
 
-async function fetchData(schemadb, table, io = console.log) {
+async function fetchData(origin, schemadb, table, io = console) {
+    connection = await sql.connect(sqlConfig[origin]);
+
     io.log(`Buscando dados da tabela ${table}`);
 
     const query = `SELECT * FROM ${schemadb}.${table}`;
     try {
-        const result = await sql.query(query);
+        const result = await connection.query(query);
         io.log(`Dados da tabela ${table} buscados com sucesso, ${result.recordset.length} linhas retornadas`);
-
         return result.recordset;
-    } catch (err) {
+    } catch (err) { 
         io.log(`Erro ao buscar dados da tabela ${table}`);
         throw err;
+    } finally {
+        closeConnection();
     }
+
 }
 
-module.exports = { connectToSql, fetchTableSchema, fetchData };
+async function closeConnection() {
+    await sql.close();
+}
+
+module.exports = { connectToSql, fetchTableSchema, fetchData, closeConnection };

@@ -5,6 +5,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const routes = require('./routes/index');
 const initializeSocket = require('./socket');
+const package = require('../package.json');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,6 +30,19 @@ app.get('/', (req, res) => {
 });
 app.get('/jobs', (req, res) => {
     res.render('jobs');
+});
+
+app.all('/test', (req, res) => {
+    res.status(200).send({
+        name: package.name,
+        version: package.version,
+        description: package.description,
+        timestamp: new Date().toISOString(),
+    });
+});
+
+app.all('*', (req, res) => {
+    res.status(404).send('Página não encontrada');
 });
 
 

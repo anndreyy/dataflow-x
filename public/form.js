@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(
-                { 
+                {
                     tableId,
                     schemaDb,
                     schemaBq,
@@ -78,14 +78,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 }),
         });
 
-        const data = await response.json();
+        try {
 
-        if (data.status && isManualSchema) {
-            showForm('manual-schema', 'Esquema Manual');
-            showSchema(data.schema);
+            const data = await response.json();
 
-            document.getElementById('form-hidden').value = JSON.stringify(data.form);
+            if (data.status && isManualSchema) {
+                showForm('manual-schema', 'Esquema Manual');
+                showSchema(data.schema);
+
+                document.getElementById('form-hidden').value = JSON.stringify(data.form);
+            } else {
+                showForm('result', 'Sucesso');
+
+                // add the message to the status div
+                var resultDiv = document.getElementById('result');
+                var div = document.createElement('div');
+                div.textContent = data.message;
+
+                // add break line
+                var br = document.createElement('br');
+                div.appendChild(br);
+
+                // create link element
+                var link = document.createElement('a');
+                link.href = data.form.link;
+                link.textContent = data.form.name;
+
+
+                // append link to the div
+                div.appendChild(link);
+                addButtons(resultDiv);
+                resultDiv.prepend(div);
+
+
+            }
+        } catch (error) {
+            showForm('result', 'Erro');
+            var resultDiv = document.getElementById('result');
+            var div = document.createElement('div');
+            div.textContent = 'Erro ao processar os dados';
+            resultDiv.prepend(div);
+
+            addButtons(resultDiv);
+
         }
+
     });
 
     // Add event listener for the schedule switch
@@ -183,7 +220,7 @@ function showSchema(schema) {
     const button = document.createElement('button');
     button.textContent = 'Salvar';
     formManualSchema.appendChild(button);
-    
+
     button.addEventListener('click', async (e) => {
 
         e.preventDefault();
@@ -209,53 +246,54 @@ function showSchema(schema) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 schema: schemaSet,
                 ...formHidden
             }),
         });
 
+
         const data = await response.json();
 
         // limpa o formulário
         formManualSchema.innerHTML = '';
-        
+
         showForm('dataForm', 'Formulário de Dados');
     });
 }
 
 function mapSqlTypeToBigQueryType(sqlType) {
     const typeMap = {
-        
-        'BIGINT': 'INT64', 
-        'INT': 'INT64', 
-        'SMALLINT': 'INT64', 
+
+        'BIGINT': 'INT64',
+        'INT': 'INT64',
+        'SMALLINT': 'INT64',
         'TINYINT': 'INT64',
-        
-        'BIT': 'BOOLEAN', 
-        'DECIMAL': 'NUMERIC', 
-        'NUMERIC': 'NUMERIC', 
+
+        'BIT': 'BOOLEAN',
+        'DECIMAL': 'NUMERIC',
+        'NUMERIC': 'NUMERIC',
         'FLOAT': 'FLOAT64',
-        
-        'REAL': 'FLOAT64', 
-        'MONEY': 'FLOAT64', 
-        'SMALLMONEY': 'FLOAT64', 
+
+        'REAL': 'FLOAT64',
+        'MONEY': 'FLOAT64',
+        'SMALLMONEY': 'FLOAT64',
         'DATE': 'DATE',
-        
-        'DATETIME': 'TIMESTAMP', 
-        'DATETIME2': 'TIMESTAMP', 
+
+        'DATETIME': 'TIMESTAMP',
+        'DATETIME2': 'TIMESTAMP',
         'SMALLDATETIME': 'TIMESTAMP',
-        
-        'TIME': 'TIME', 
-        'TIMESTAMP': 'TIMESTAMP', 
+
+        'TIME': 'TIME',
+        'TIMESTAMP': 'TIMESTAMP',
         'DATETIMEOFFSET': 'TIMESTAMP',
-        
-        'CHAR': 'STRING', 
-        'VARCHAR': 'STRING', 
-        'TEXT': 'STRING', 
+
+        'CHAR': 'STRING',
+        'VARCHAR': 'STRING',
+        'TEXT': 'STRING',
         'NCHAR': 'STRING',
-        
-        'NVARCHAR': 'STRING', 
+
+        'NVARCHAR': 'STRING',
         'NTEXT': 'STRING'
     };
     return typeMap[sqlType.toUpperCase()] || 'STRING';
@@ -263,11 +301,24 @@ function mapSqlTypeToBigQueryType(sqlType) {
 
 function scheduleSwitch() {
     var checkBox = document.getElementById("isSchedule");
-    
-    if (checkBox.checked == true){
+
+    if (checkBox.checked == true) {
         document.getElementById("schedule").style.display = "block";
     }
     else {
         document.getElementById("schedule").style.display = "none";
     }
+}
+
+function addButtons(element) {
+    // add break line
+    var br = document.createElement('br');
+    element.appendChild(br);
+    var button = document.createElement('button');
+    button.textContent = 'Voltar';
+    button.addEventListener('click', function () {
+        location.reload();
+    });
+
+    element.appendChild(button);
 }

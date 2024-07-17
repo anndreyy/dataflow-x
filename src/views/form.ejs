@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Transfer</title>
+    <title>DX - Dataflow X</title>
     <link rel="stylesheet" href="/style.css">
     <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
     <div id="root">
         <h1 id="title">Ingestão</h1>
@@ -16,6 +18,7 @@
                 <select id="origin">
                     <option value="ssot">ssot</option>
                     <option value="rentsoft">rentsoft</option>
+                    <option value="protheus">protheus</option>
                     <option value="salesforce" disabled>salesforce</option>
                 </select>
             </label>
@@ -59,9 +62,11 @@
         <form id="progress" class="form">
             Processando...
         </form>
+        <form id="result" class="form"></form>
         <div id="status"></div>
     </div>
     <script src="/form.js"></script>
     <input type="hidden" name="form-hidden" id="form-hidden" value="">
 </body>
+
 </html>

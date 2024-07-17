@@ -1,10 +1,10 @@
 const { fetchTableSchema } = require('../models/sqlModel');
 const { mapSqlTypeToBigQueryType } = require('../utils/typeMapping');
 
-async function inferSchemaFromDb(schemadb, table) {
+async function inferSchemaFromDb(origin, schemadb, table) {
     const schema = [];
     const schemaBase = [];
-    const tableSchema = await fetchTableSchema(schemadb, table);
+    const tableSchema = await fetchTableSchema(origin, schemadb, table);
 
     tableSchema.forEach(column => {
         const bigQueryType = mapSqlTypeToBigQueryType(column.DATA_TYPE);

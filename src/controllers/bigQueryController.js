@@ -7,7 +7,21 @@ async function loadDataToBigQuery(req, res) {
 
     try {
         await ensureDatasetExists(datasetId);
-        await loadToBigQuery(datasetId, tableId, data, schema, isDelete, isCreate, attemptsMax);
+        
+        // Split the data into smaller chunks
+        const chunkSize = 5000; // Set the desired chunk size
+        const chunks = [];
+        for (let i = 0; i < data.length; i += chunkSize) {
+            chunks.push(data.slice(i, i + chunkSize));
+        }
+        
+        // Load each chunk to BigQuery
+        for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
+            await loadToBigQuery(datasetId, tableId, chunk, schema, isDelete, isCreate, attemptsMax);
+            console.log(`Chunk ${i + 1} loaded to BigQuery`);
+        }
+        
         res.json({ message: 'Dados carregados com sucesso no BigQuery' });
     } catch (err) {
         res.status(500).json({ error: err.message });
